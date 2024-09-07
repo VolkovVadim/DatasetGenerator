@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-EXAMPLES_COUNT     = 5000
+EXAMPLES_COUNT     = 15000
 
 
 def show_info(dataframe: pd.DataFrame) -> None:
@@ -23,14 +23,24 @@ def show_info(dataframe: pd.DataFrame) -> None:
     print("\n")
 
 
-def generate_v1() -> pd.DataFrame:
-    min_f1, max_f1 = 0.0, 15.0
-    min_f2, max_f2 = 0.0, 15.0
+def generate(func_type: int = 1) -> pd.DataFrame:
+    min_f1, max_f1 = -25.0, 25.0
+    min_f2, max_f2 = -25.0, 25.0
 
     F1 = min_f1 + np.random.rand(EXAMPLES_COUNT) * max_f1
     F2 = min_f2 + np.random.rand(EXAMPLES_COUNT) * max_f2
 
-    Y = np.sin(F1) + np.cos(F2)
+    if func_type < 1 or func_type > 3:
+        func_type = 1
+
+    if func_type == 1:
+        Y = np.sin(F1) + np.cos(F2)
+
+    if func_type == 2:
+        Y = np.sin(F1) + np.cos(F2) + np.arctan(F2)
+
+    if func_type == 3:
+        Y = 10.0 * F1 - 0.05 * (F2 * F2 * F2) + 75.0 * np.sin(F1) - 55.0 * np.cos(F2)
 
     data = {
         "feature_1": F1,
@@ -48,7 +58,8 @@ if __name__ == "__main__":
 
 
     # Generate data
-    df_generated_dataset = generate_v1()
+    func_type = 3
+    df_generated_dataset = generate(func_type)
     show_info(df_generated_dataset)
 
 
@@ -76,9 +87,9 @@ if __name__ == "__main__":
 
 
     # Save data to file
-    dataset_filename = f"generated_data_v1_{EXAMPLES_COUNT}.csv"
-    df_generated_dataset.to_csv(dataset_filename, index=False)
-    print(f"Dataset saved to file : {dataset_filename}")
+    #dataset_filename = f"generated_data_v1_{EXAMPLES_COUNT}.csv"
+    #df_generated_dataset.to_csv(dataset_filename, index=False)
+    #print(f"Dataset saved to file : {dataset_filename}")
 
 
     print("Success")
