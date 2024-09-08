@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import argparse
 
 
-EXAMPLES_COUNT     = 15000
+EXAMPLES_COUNT     = 5000
 
 
 def show_info(dataframe: pd.DataFrame) -> None:
@@ -57,6 +58,17 @@ if __name__ == "__main__":
     print(f"  Pandas : {pd.__version__}")
 
 
+    # Parse command args
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--save", help="save genereated dataset to file", action="store_true")
+    parser.add_argument("-c", "--count", help="dataset points count", type=int)
+
+    args = parser.parse_args()
+
+    if args.count:
+        EXAMPLES_COUNT = args.count
+
+
     # Generate data
     func_type = 3
     df_generated_dataset = generate(func_type)
@@ -87,9 +99,10 @@ if __name__ == "__main__":
 
 
     # Save data to file
-    #dataset_filename = f"generated_data_v1_{EXAMPLES_COUNT}.csv"
-    #df_generated_dataset.to_csv(dataset_filename, index=False)
-    #print(f"Dataset saved to file : {dataset_filename}")
+    if args.save:
+        dataset_filename = f"regression_v{func_type}_{EXAMPLES_COUNT}.csv"
+        df_generated_dataset.to_csv(dataset_filename, index=False)
+        print(f"Dataset saved to file : {dataset_filename}")
 
 
     print("Success")
