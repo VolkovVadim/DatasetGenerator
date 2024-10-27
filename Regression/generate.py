@@ -5,6 +5,7 @@ import argparse
 
 
 EXAMPLES_COUNT     = 5000
+FUNC_TYPE          = 3
 
 
 def show_info(dataframe: pd.DataFrame) -> None:
@@ -62,15 +63,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--save", help="save genereated dataset to file", action="store_true")
     parser.add_argument("-c", "--count", help="dataset points count", type=int)
+    parser.add_argument("-t", "--type", help="generator function type", type=int)
 
     args = parser.parse_args()
 
     if args.count:
         EXAMPLES_COUNT = args.count
 
+    if args.type:
+        FUNC_TYPE = args.type
 
     # Generate data
-    func_type = 3
+    func_type = FUNC_TYPE
     df_generated_dataset = generate(func_type)
     show_info(df_generated_dataset)
 
