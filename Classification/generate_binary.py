@@ -38,7 +38,7 @@ def visualize(data: pd.DataFrame) -> None:
     plt.ylabel('Feature 2', fontdict=label_font)
     plt.title('Binary classification')
 
-    color = ['red' if value == 0 else 'blue' for value in data.value]
+    color = ['red' if label == 0 else 'blue' for label in data.class_label]
 
     plt.scatter(
         data.feature_1,
@@ -72,7 +72,7 @@ def generate(func_type: int = 1) -> pd.DataFrame:
     data = {
         "feature_1": F1,
         "feature_2": F2,
-        "value": Y
+        "class_label": Y
     }
 
     return pd.DataFrame(data)
