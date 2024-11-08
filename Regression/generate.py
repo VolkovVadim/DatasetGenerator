@@ -53,6 +53,33 @@ def generate(func_type: int = 1) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
+def visualize(data: pd.DataFrame) -> None:
+    plt.style.use('fivethirtyeight')
+    fig = plt.figure(figsize=(12, 10), dpi=80)
+    ax = fig.add_subplot(projection='3d')
+    ax.set_xlabel("feature_1")
+    ax.set_ylabel("feature_2")
+    ax.set_zlabel("value")
+
+    ax.xaxis.label.set_color("blue")
+    ax.yaxis.label.set_color("blue")
+    ax.zaxis.label.set_color("red")
+
+    color = data.value
+    point_size = 5 if data.shape[0] < 50000 else 1
+
+    ax.scatter(
+        data['feature_1'],
+        data['feature_2'],
+        data['value'],
+        c = color,  # values for cmap
+        s = point_size,      # marker size
+        cmap='viridis'
+    )
+
+    plt.show()
+
+
 if __name__ == "__main__":
     print("Versions")
     print(f"  NumPy  : {np.__version__}")
@@ -80,26 +107,7 @@ if __name__ == "__main__":
 
 
     # Visualize data
-    fig = plt.figure(figsize=(7, 7))
-    ax = fig.add_subplot(projection='3d')
-    ax.set_xlabel("feature_1")
-    ax.set_ylabel("feature_2")
-    ax.set_zlabel("value")
-
-    ax.xaxis.label.set_color("blue")
-    ax.yaxis.label.set_color("blue")
-    ax.zaxis.label.set_color("red")
-
-    ax.scatter(
-        df_generated_dataset['feature_1'],
-        df_generated_dataset['feature_2'],
-        df_generated_dataset['value'],
-        c = df_generated_dataset['value'],  # values for cmap
-        s = 2,                              # marker size
-        cmap='viridis'
-    )
-
-    plt.show()
+    visualize(df_generated_dataset)
 
 
     # Save data to file
