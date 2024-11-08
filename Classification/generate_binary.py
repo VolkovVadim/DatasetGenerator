@@ -40,10 +40,12 @@ def visualize(data: pd.DataFrame) -> None:
 
     color = ['red' if label == 0 else 'blue' for label in data.class_label]
 
+    point_size = 3 if data.shape[0] < 50000 else 1
+
     plt.scatter(
         data.feature_1,
         data.feature_2,
-        s=3,
+        s=point_size,
         c=color
     )
 
