@@ -35,18 +35,20 @@ def visualize(data: pd.DataFrame) -> None:
         'size': 10
     }
 
+    points_count = data.shape[0]
+
     plt.xlabel('Feature 1', fontdict=label_font)
     plt.ylabel('Feature 2', fontdict=label_font)
-    plt.title('Multilabel classification')
+    plt.title(f"Multilabel classification ({points_count} points)")
 
     color_map = {
-        0: 'red',
-        1: 'yellow',
-        2: 'blue'
+        0: 'blue',
+        1: 'lime',
+        2: 'green'
     }
 
     color = [color_map[label] for label in data.class_label]
-    point_size = 3 if data.shape[0] < 50000 else 1
+    point_size = 5 if points_count < 20000 else 1
 
     plt.scatter(
         data.feature_1,
