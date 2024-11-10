@@ -174,7 +174,12 @@ if __name__ == "__main__":
 
     # Save data to file
     if args.save:
-        dataset_filename = f"multilabel_classification_v{FUNC_TYPE}_{EXAMPLES_COUNT}.csv"
+        file_format = "csv"
+        dataset_filename = f"multilabel_classification_v{FUNC_TYPE}_{EXAMPLES_COUNT}"
+        if is_noised:
+            dataset_filename += "_with_noise"
+        dataset_filename += f".{file_format}"
+
         df_generated_dataset.to_csv(dataset_filename, index=False)
         print(f"Dataset saved to file : {dataset_filename}")
 
