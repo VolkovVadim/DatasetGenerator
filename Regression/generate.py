@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import argparse
 
 
-EXAMPLES_COUNT     = 5000
-FUNC_TYPE          = 3
+EXAMPLES_COUNT     = 5000       # Points count in dataset
+FUNC_TYPE          = 3          # Dataset type
+NOISE_ALPHA        = 0.8        # Part of the dataset with outliers
+NOISE_LEVEL        = 0.5        # Data noise level
 
 
 def show_info(dataframe: pd.DataFrame) -> None:
@@ -25,7 +27,13 @@ def show_info(dataframe: pd.DataFrame) -> None:
     print("\n")
 
 
-def generate(func_type: int = 1) -> pd.DataFrame:
+def generate(
+        count: int, 
+        func_type: int = 1, 
+        noise: bool = False,
+        noise_alpha: float = 0.1,
+        noise_level: float = 1.0
+) -> pd.DataFrame:
     min_f1, max_f1 = -25.0, 25.0
     min_f2, max_f2 = -25.0, 25.0
 
@@ -43,6 +51,13 @@ def generate(func_type: int = 1) -> pd.DataFrame:
 
     if func_type == 3:
         Y = 10.0 * F1 - 0.05 * (F2 * F2 * F2) + 75.0 * np.sin(F1) - 55.0 * np.cos(F2)
+
+    if noise:
+        examples_with_noise = int(float(count) * noise_alpha)
+        selected_examples = np.random.randint(count, size=examples_with_noise)
+        for i in selected_examples:
+            F1[i] += np.random.normal(scale=noise_level)
+            F2[i] += np.random.normal(scale=noise_level)
 
     data = {
         "feature_1": F1,
@@ -66,13 +81,16 @@ def visualize(data: pd.DataFrame) -> None:
     ax.zaxis.label.set_color("red")
 
     color = data.value
-    point_size = 5 if data.shape[0] < 50000 else 1
+    points_count = data.shape[0]
+    point_size = 5 if points_count < 50000 else 1
+
+    ax.text2D(0.05, 0.95, f"Regression dataset with {points_count} examples", transform=ax.transAxes)
 
     ax.scatter(
         data['feature_1'],
         data['feature_2'],
         data['value'],
-        c = color,  # values for cmap
+        c = color,           # values for cmap
         s = point_size,      # marker size
         cmap='viridis'
     )
@@ -89,6 +107,7 @@ if __name__ == "__main__":
     # Parse command args
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--save", help="save genereated dataset to file", action="store_true")
+    parser.add_argument("-n", "--noise", help="generate dataset with outliers", action="store_true")
     parser.add_argument("-c", "--count", help="dataset points count", type=int)
     parser.add_argument("-t", "--type", help="generator function type", type=int)
 
@@ -101,8 +120,14 @@ if __name__ == "__main__":
         FUNC_TYPE = args.type
 
     # Generate data
-    func_type = FUNC_TYPE
-    df_generated_dataset = generate(func_type)
+    is_noised = True if args.noise else False
+    df_generated_dataset = generate(
+        EXAMPLES_COUNT, 
+        func_type=FUNC_TYPE,
+        noise=is_noised,
+        noise_alpha=NOISE_ALPHA,
+        noise_level=NOISE_LEVEL
+    )
     show_info(df_generated_dataset)
 
 
@@ -112,7 +137,12 @@ if __name__ == "__main__":
 
     # Save data to file
     if args.save:
-        dataset_filename = f"regression_v{func_type}_{EXAMPLES_COUNT}.csv"
+        file_format = "csv"
+        dataset_filename = f"binary_classification_v{FUNC_TYPE}_{EXAMPLES_COUNT}"
+        if is_noised:
+            dataset_filename += "_with_noise"
+        dataset_filename += f".{file_format}"
+
         df_generated_dataset.to_csv(dataset_filename, index=False)
         print(f"Dataset saved to file : {dataset_filename}")
 
