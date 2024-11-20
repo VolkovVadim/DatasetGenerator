@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # Save data to file
     if args.save:
         file_format = "csv"
-        dataset_filename = f"binary_classification_v{FUNC_TYPE}_{EXAMPLES_COUNT}"
+        dataset_filename = f"regression_v{FUNC_TYPE}_{EXAMPLES_COUNT}"
         if is_noised:
             dataset_filename += "_with_noise"
         dataset_filename += f".{file_format}"
