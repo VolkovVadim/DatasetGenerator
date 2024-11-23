@@ -27,7 +27,7 @@ def show_info(dataframe: pd.DataFrame) -> None:
     print("\n")
 
 
-def visualize(data: pd.DataFrame) -> None:
+def visualize(data: pd.DataFrame, borders: pd.DataFrame = None) -> None:
     plt.style.use('ggplot')
     plt.figure(figsize=(12, 10), dpi=80)
 
@@ -37,9 +37,20 @@ def visualize(data: pd.DataFrame) -> None:
         'size': 10
     }
 
+    points_count = data.shape[0]
+
     plt.xlabel('Feature 1', fontdict=label_font)
     plt.ylabel('Feature 2', fontdict=label_font)
-    plt.title('Binary classification')
+    plt.title(f'Binary classification ({points_count} points)')
+
+    if borders is not None:
+        plt.plot(
+            borders.x1,
+            borders.y1,
+            linestyle='--',
+            linewidth=2,
+            c='midnightblue',
+        )
 
     color = ['red' if label == 0 else 'blue' for label in data.class_label]
 
@@ -96,6 +107,31 @@ def generate(
     return pd.DataFrame(data)
 
 
+def get_borders(func_type: int = 1) -> pd.DataFrame:
+    if func_type < 1 or func_type > 3:
+        func_type = 1
+
+    min_x, max_x = -25.0, 25.0
+
+    Y = np.arange(min_x, max_x, 0.25)
+
+    if func_type == 1:
+        X = [Y[i] for i in range(len(Y))]
+
+    if func_type == 2:
+        X = [10.0 * np.sin(0.25 * Y[i]) for i in range(len(Y))]
+
+    if func_type == 3:
+        X = [Y[i] + 5.5 * np.sin(0.5 * Y[i]) for i in range(len(Y))]
+
+    data = {
+        "x1": X,
+        "y1": Y
+    }
+
+    return pd.DataFrame(data)
+
+
 if __name__ == "__main__":
     print("Versions")
     print(f"  NumPy  : {np.__version__}")
@@ -105,6 +141,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--save", help="save genereated dataset to file", action="store_true")
     parser.add_argument("-n", "--noise", help="generate dataset with outliers", action="store_true")
+    parser.add_argument("-b", "--border", help="show class border", action="store_true")
     parser.add_argument("-c", "--count", help="dataset points count", type=int)
     parser.add_argument("-t", "--type", help="generator function type", type=int)
 
@@ -125,12 +162,23 @@ if __name__ == "__main__":
         noise_alpha=NOISE_ALPHA,
         noise_level=NOISE_LEVEL
     )
+
+    df_borders = None
+    if args.border:
+        df_borders = get_borders(func_type=FUNC_TYPE)
+
     show_info(df_generated_dataset)
-    visualize(df_generated_dataset)
+    visualize(data=df_generated_dataset, borders=df_borders)
 
     # Save data to file
     if args.save:
         file_format = "csv"
+
+        if df_borders is not None:
+            border_filename = f"binary_classification_v{FUNC_TYPE}_border.{file_format}"
+            df_borders.to_csv(border_filename, index=False)
+            print(f"Class border data saved to file : {border_filename}")
+
         dataset_filename = f"binary_classification_v{FUNC_TYPE}_{EXAMPLES_COUNT}"
         if is_noised:
             dataset_filename += "_with_noise"
