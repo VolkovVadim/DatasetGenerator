@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 
+from typing import List
+
 
 EXAMPLES_COUNT     = 5000       # Points count in dataset
 FUNC_TYPE          = 3          # Dataset type
@@ -27,7 +29,7 @@ def show_info(dataframe: pd.DataFrame) -> None:
     print("\n")
 
 
-def visualize(data: pd.DataFrame) -> None:
+def visualize(data: pd.DataFrame, borders: List[pd.DataFrame] = None) -> None:
     plt.style.use('ggplot')
     plt.figure(figsize=(12, 10), dpi=80)
 
@@ -42,6 +44,17 @@ def visualize(data: pd.DataFrame) -> None:
     plt.xlabel('Feature 1', fontdict=label_font)
     plt.ylabel('Feature 2', fontdict=label_font)
     plt.title(f"Multilabel classification ({points_count} points)")
+
+    if borders is not None:
+        borders_count = len(borders)
+        for i in range(borders_count):
+            plt.plot(
+                borders[i].x,
+                borders[i].y,
+                linestyle='--',
+                linewidth=2,
+                c='midnightblue',
+            )
 
     color_map = {
         0: 'blue',
@@ -111,7 +124,7 @@ def generate(
         Y = []
         for i in range(count):
             value_1 = F2[i] + 5.5 * np.sin(0.45 * F2[i]) - 15.0
-            value_2 = F2[i] + 5.05* np.sin(0.95 * F2[i]) + 15.0
+            value_2 = F2[i] + 5.0 * np.sin(0.95 * F2[i]) + 15.0
 
             if F1[i] <= value_1:
                 Y.append(0)
@@ -139,6 +152,55 @@ def generate(
     return pd.DataFrame(data)
 
 
+def get_borders(func_type: int = 1) -> List[pd.DataFrame]:
+    if func_type < 1 or func_type > 3:
+        func_type = 1
+
+    min_x, max_x = -25.0, 25.0
+    min_y, max_y = -25.0, 25.0
+
+    Y = np.arange(min_y, max_y, 0.025)
+
+    result = []
+
+    X1, Y1, X2, Y2 = [], [], [], []
+    for i in range(len(Y)):
+        if func_type == 1:
+            x1, y1 = Y[i] - 10.0, Y[i]
+            x2, y2 = Y[i] + 10.0, Y[i]
+
+        if func_type == 2:
+            x1, y1 = 10.0 * np.sin(0.25 * Y[i]) - 10.0, Y[i]
+            x2, y2 = 10.0 * np.sin(0.25 * Y[i]) + 10.0, Y[i]
+
+        if func_type == 3:
+            x1, y1 = Y[i] + 5.5 * np.sin(0.45 * Y[i]) - 15.0, Y[i]
+            x2, y2 = Y[i] + 5.0 * np.sin(0.95 * Y[i]) + 15.0, Y[i]
+
+        if x1 >= min_x and x1 <= max_x:
+            X1.append(x1)
+            Y1.append(y1)
+
+        if x2 >= min_x and x2 <= max_x:
+            X2.append(x2)
+            Y2.append(y2)
+
+    data_1 = {
+        "x": X1,
+        "y": Y1
+    }
+
+    data_2 = {
+        "x": X2,
+        "y": Y2
+    }
+
+    result.append(pd.DataFrame(data_1))
+    result.append(pd.DataFrame(data_2))
+
+    return result
+
+
 if __name__ == "__main__":
     print("Versions")
     print(f"  NumPy  : {np.__version__}")
@@ -148,6 +210,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--save", help="save genereated dataset to file", action="store_true")
     parser.add_argument("-n", "--noise", help="generate dataset with outliers", action="store_true")
+    parser.add_argument("-b", "--border", help="show borders of all classes", action="store_true")
     parser.add_argument("-c", "--count", help="dataset points count", type=int)
     parser.add_argument("-t", "--type", help="generator function type", type=int)
 
@@ -170,11 +233,24 @@ if __name__ == "__main__":
     )
 
     show_info(df_generated_dataset)
-    visualize(df_generated_dataset)
+
+    borders = None
+    if args.border:
+        borders = get_borders(func_type=FUNC_TYPE)
+
+    visualize(data=df_generated_dataset, borders=borders)
 
     # Save data to file
     if args.save:
         file_format = "csv"
+
+        if borders is not None:
+            borders_count = len(borders)
+            for i in range(borders_count):
+                border_filename = f"multilabel_classification_v{FUNC_TYPE}_border_{i}.{file_format}"
+                borders[i].to_csv(border_filename, index=False)
+                print(f"Class border #{i} saved to file : {border_filename}")
+
         dataset_filename = f"multilabel_classification_v{FUNC_TYPE}_{EXAMPLES_COUNT}"
         if is_noised:
             dataset_filename += "_with_noise"
