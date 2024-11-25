@@ -156,8 +156,9 @@ def get_borders(func_type: int = 1) -> List[pd.DataFrame]:
     if func_type < 1 or func_type > 3:
         func_type = 1
 
-    min_x, max_x = -25.0, 25.0
-    min_y, max_y = -25.0, 25.0
+    margin_x, margin_y = 0.75, 0.75
+    min_x, max_x = -25.0 - margin_x, 25.0 + margin_x
+    min_y, max_y = -25.0 - margin_y, 25.0 + margin_y
 
     Y = np.arange(min_y, max_y, 0.025)
 
