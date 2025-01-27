@@ -143,6 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--save", help="save genereated dataset to file", action="store_true")
     parser.add_argument("-n", "--noise", help="generate dataset with outliers", action="store_true")
     parser.add_argument("-b", "--border", help="show class border", action="store_true")
+    parser.add_argument("-l", "--nolabel", help="do not add class labels", action="store_true")
     parser.add_argument("-c", "--count", help="dataset points count", type=int)
     parser.add_argument("-t", "--type", help="generator function type", type=int)
 
@@ -181,8 +182,14 @@ if __name__ == "__main__":
             print(f"Class border data saved to file : {border_filename}")
 
         dataset_filename = f"binary_classification_v{FUNC_TYPE}_{EXAMPLES_COUNT}"
+
         if is_noised:
             dataset_filename += "_with_noise"
+
+        if args.nolabel:
+            df_generated_dataset = df_generated_dataset.drop("class_label", axis=1)
+            dataset_filename += "_no_label"
+
         dataset_filename += f".{file_format}"
 
         df_generated_dataset.to_csv(dataset_filename, index=False)
